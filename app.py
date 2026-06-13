@@ -1,16 +1,29 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+import streamlit as st
+import numpy as np
+import pickle
 
-data = pd.read_csv('diabetes.csv')
-X = data.drop('Outcome', axis=1)
-y = data['Outcome']
+# Load trained model
+model = pickle.load(open('diabetes_model.pkl', 'rb'))
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+st.title("Diabetes Prediction System")
 
-model = LogisticRegression(max_iter=1000)
-model.fit(X_train, y_train)
+pregnancies = st.number_input("Pregnancies", min_value=0)
+glucose = st.number_input("Glucose Level", min_value=0)
+blood_pressure = st.number_input("Blood Pressure", min_value=0)
+skin_thickness = st.number_input("Skin Thickness", min_value=0)
+insulin = st.number_input("Insulin", min_value=0)
+bmi = st.number_input("BMI", min_value=0.0)
+dpf = st.number_input("Diabetes Pedigree Function", min_value=0.0)
+age = st.number_input("Age", min_value=1)
 
-y_pred = model.predict(X_test)
-print('Model Accuracy:', accuracy_score(y_test, y_pred))
+if st.button("Predict"):
+    input_data = np.array([[pregnancies, glucose, blood_pressure,
+                            skin_thickness, insulin, bmi,
+                            dpf, age]])
+
+    prediction = model.predict(input_data)
+
+    if prediction[0] == 1:
+        st.error("The person is likely to have Diabetes.")
+    else:
+        st.success("The person is not likely to have Diabetes.")
